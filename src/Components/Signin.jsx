@@ -32,11 +32,6 @@ const Signin = () => {
     //update the loading hook with the meassage
     setLoading("Please wait as we sign in to your account...")
 
-    // clear loading after some time
-    setTimeout(() => {
-      setLoading("");
-    }, 3000);
-
     try {
       // create a formdata for email and pasword
       const formdata = new FormData()
@@ -53,23 +48,32 @@ const Signin = () => {
 
       // check whether the user exists as paert of you api response from the api
       if (response.data.user) {
-        // user is there details entered during sign in are currect
+        
+        // 1. Save token, role parameters, and user details to localStorage
         localStorage.setItem("user", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userRole", response.data.user.role); 
+        localStorage.setItem("username", response.data.user.username);
 
         // if yhe user exist ,update the success hook with a message
-        setSuccess("login successful")
+        setSuccess("Login successful!")
 
         // back to default
         setEmail("")
         setPassword("")
 
-        navigate("/getproduct2")   // home route
-
-        // delay use to seee success massega
+        // 2. Conditional Routing based on User Role with delayed execution
         setTimeout(() => {
-          navigate("/getproduct2");
+          setSuccess("");
+          if (response.data.user.role === "admin") {
+            // Send admins straight to the admin dashboard panel
+            window.location.href = "/admin"; 
+          } else {
+            // Send regular users to the standard client area or homepage
+            navigate("/getproduct2"); 
+          }
         }, 1500);
+
       }
       else {
         //  user credantials are missing enterd are incorrect
@@ -81,17 +85,16 @@ const Signin = () => {
         }, 3000);
       }
 
-      setTimeout(() => {
-        setSuccess("");
-      }, 3000);
-
     }
     catch (error) {
       // set loading back to default
       setLoading("")
 
+      // Extract error message text or fallback gracefully
+      const errorMsg = error.response?.data?.message || "Login failed please try again";
+
       // update the error on the hook with as msg
-      setError("login in failed please try again")
+      setError(errorMsg)
 
       // clear error message displayed
       setTimeout(() => {
