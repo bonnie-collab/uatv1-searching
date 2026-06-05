@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+// Import the eye icons from lucide-react
+import { Eye, EyeOff } from 'lucide-react';
 
 // import the external css file that contains all styles for this signin component
 import '../css/Signin.css';
@@ -17,10 +19,13 @@ const Signin = () => {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
+  // Hook to toggle password visibility state (NEW)
+  const [showPassword, setShowPassword] = useState(false);
+
   // use navigate hook to redirect to another page on successfull login
   const navigate = useNavigate();
 
-  //  function to handle the signing action
+  //   function to handle the signing action
   const handlesubmit = async (e) => {
 
     // prevent the app from reloading
@@ -36,7 +41,7 @@ const Signin = () => {
       // create a formdata for email and pasword
       const formdata = new FormData()
 
-      //  insert the emal and the password
+      //   insert the emal and the password
       formdata.append("email", email)
       formdata.append("password", password)
 
@@ -76,7 +81,7 @@ const Signin = () => {
 
       }
       else {
-        //  user credantials are missing enterd are incorrect
+        //   user credantials are missing enterd are incorrect
         setError("invalid email or password")
 
         // error hide after 4sec
@@ -155,7 +160,7 @@ const Signin = () => {
           background: "#f5f5f5"
         }}>
 
-          {/*  Back Button (NEW) */}
+          {/* Back Button (NEW) */}
           <button
             onClick={() => navigate("/")}
             style={{
@@ -223,14 +228,37 @@ const Signin = () => {
               {/* enter password input */}
               <div className="signin-field">
                 <label className="signin-label">Password</label>
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                  className="signin-input"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div style={{ position: "relative", width: "100%" }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    className="signin-input"
+                    style={{ width: "100%", paddingRight: "40px" }}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {/* Eye toggle button container */}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      color: "#6b7280",
+                      padding: 0
+                    }}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
               {/* submit button */}

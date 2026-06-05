@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -26,11 +26,41 @@ import Checkout from "./Components/Checkout";
 import Aboutus from './Components/Aboutus';
 
 // Admin panel pages
-// (Login dropped automatically since we now use the single global Signin component)
 import Dashboard from './Components/Pages/Dashboard'
 import Users from './Components/Pages/Users'
 import Products from './Components/Pages/Products'
 import Payments from './Components/Pages/Payments'
+
+// ── NEW ISOLATED ADMIN TOP BAR MENU COMPONENT (FIXES PUBLIC LINK LEAK) ──
+const AdminNavbar = ({ toggleSidebar }) => {
+  return (
+    <div style={{
+      height: '64px',
+      background: '#080c14',
+      borderBottom: '1px solid rgba(255,255,255,0.06)',
+      display: 'flex',
+      alignItems: 'center',
+      padding: '0 24px',
+      color: '#f1f5f9'
+    }}>
+      <button 
+        onClick={toggleSidebar} 
+        style={{
+          background: 'transparent',
+          border: 'none',
+          color: '#64748b',
+          fontSize: '20px',
+          cursor: 'pointer'
+        }}
+      >
+        <i className="fas fa-bars"></i>
+      </button>
+      <div style={{ marginLeft: '20px', fontWeight: '600', fontSize: '15px' }}>
+        System Management Console
+      </div>
+    </div>
+  );
+};
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -46,7 +76,7 @@ function App() {
       return <Navigate to="/signin" replace />;
     }
 
-    // ── Admin panel layout (Sidebar + Navbar + dynamic content wrapper shell) ──
+    // ── Admin panel layout (Sidebar + AdminNavbar + dynamic content wrapper shell) ──
     return (
       <div className="d-flex bg-slate-900 min-vh-100" style={{ width: '100vw', overflowX: 'hidden' }}>
         <Sidebar
@@ -55,7 +85,7 @@ function App() {
           setActivePage={setActivePage}
           handleLogout={() => {
             localStorage.clear();
-            window.location.href = '/signin';
+            window.location.href = '/';
           }}
         />
 
@@ -67,10 +97,8 @@ function App() {
             minWidth: 0
           }}
         >
-          <Navbar
-            toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            sidebarOpen={sidebarOpen}
-          />
+          {/* Swapped generic <Navbar /> to isolated <AdminNavbar /> to stop public links leak */}
+          <AdminNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
           <main className="position-relative" style={{ padding: '20px' }}>
             {/* The Outlet handles the actual admin components dynamically without leaking styles */}
@@ -81,38 +109,51 @@ function App() {
     );
   };
 
+  // ============added PUBLIC LAYOUT====================
+  const PublicLayout = () => {
+    return (
+      <>
+        {/* ── Public site header ── */}
+        <header className="App-header">
+          <h1 className='searchingltd'>
+            welcome to searching Limited Quality construction materials & tools. Buy new or resale.
+          </h1>
+        </header>
+
+        {/* Optional public navbar (if needed globally) */}
+        {/* <Navbar /> */}
+
+        {/* Dynamic content rendered here */}
+        <Outlet />
+      </>
+    );
+  };
+
   return (
     <Router>
       <div className="App">
 
         {/* different routes binding the rendered documents */}
         <Routes>
-          {/* ── PUBLIC ROUTES SECTION (No sidebar layout leak can hit these) ── */}
-          <Route path='/'                element={
-            <>
-              {/* ── Public site header ── */}
-              <header className="App-header">
-                <h1 className='searchingltd'>
-                  welcome to searching Limited Quality construction materials & tools. Buy new or resale.
-                </h1>
-              </header>
-              <Getproducts />
-            </>
-          } />
-          
-          <Route path='/getproduct2'     element={<Getproduct2 />} />
-          <Route path='/signup'          element={<Signup />} />
-          <Route path='/signin'          element={<Signin />} />
-          <Route path='/addproducts'     element={<Addproducts />} />
-          <Route path='/forgotpassword'  element={<ForgotPassword />} />
-          <Route path='/makepayments'    element={<Makepayments />} />
-          <Route path='/verify-otp'      element={<VerifyOTP />} />
-          {/* <Route path='/test'            element={<Test />} /> */}
-          <Route path='/dashnavbar'      element={<Dashnavbar />} />
-          <Route path='/profile'         element={<Profile />} />
-          <Route path='/cart'            element={<Cart />} />
-          <Route path='/checkout'        element={<Checkout />} />
-          <Route path='/aboutus'         element={<Aboutus />} />
+
+          {/* ── PUBLIC ROUTES SECTION (Now properly structured) ── */}
+          <Route path='/' element={<PublicLayout />}>
+            <Route index element={<Getproducts />} />
+            <Route path='getproduct2' element={<Getproduct2 />} />
+            <Route path='signup' element={<Signup />} />
+            <Route path='signin' element={<Signin />} />
+            <Route path='addproducts' element={<Addproducts />} />
+            <Route path='forgotpassword' element={<ForgotPassword />} />
+            <Route path='makepayments' element={<Makepayments />} />
+            <Route path='verify-otp' element={<VerifyOTP />} />
+            
+            {/* <Route path='/test' element={<Test />} /> */}
+            <Route path='dashnavbar' element={<Dashnavbar />} />
+            <Route path='profile' element={<Profile />} />
+            <Route path='cart' element={<Cart />} />
+            <Route path='checkout' element={<Checkout />} />
+            <Route path='aboutus' element={<Aboutus />} />
+          </Route>
 
           {/* ── CLEANLY ISOLATED ADMIN CONTROL DASHBOARD PANELS ── */}
           <Route path='/admin' element={<AdminSecurityGuard />}>
@@ -123,7 +164,8 @@ function App() {
           </Route>
 
           {/* Catch-all fallback default */}
-          <Route path='*'                element={<Notfound />} />
+          <Route path='*' element={<Notfound />} />
+
         </Routes>
 
       </div>

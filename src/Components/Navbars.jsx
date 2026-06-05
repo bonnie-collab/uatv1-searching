@@ -1,41 +1,76 @@
-import React from 'react';
+import { useLocation } from "react-router-dom";
+
+const pageTitles = {
+  "/admin":          "Dashboard",
+  "/admin/users":    "Users",
+  "/admin/products": "Products",
+  "/admin/payments": "Payments",
+};
 
 export default function Navbar({ toggleSidebar, sidebarOpen }) {
-  const user = JSON.parse(localStorage.getItem('user')) || { username: 'Admin User', role: 'admin' };
+  const location = useLocation();
+  const title = pageTitles[location.pathname] || "Admin";
 
   return (
-    <nav className="navbar navbar-expand bg-slate-800 border-bottom border-slate-700 sticky-top px-4" style={{ height: '70px' }}>
-      <button className="btn btn-link text-slate-400 p-0 me-3" onClick={toggleSidebar}>
-        <i className={`bi ${sidebarOpen ? 'bi-text-paragraph' : 'bi-list'} fs-4`}></i>
-      </button>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap');
+        .toggle-btn:hover { background: rgba(255,255,255,0.08) !important; }
+      `}</style>
 
-      <div className="d-none d-md-flex position-relative w-25">
-        <i className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-slate-400"></i>
-        <input type="text" className="form-control bg-slate-900 border-slate-700 text-white ps-5 rounded-pill" placeholder="Search transactions, users..." />
-      </div>
+      <header style={{
+        height: "64px",
+        background: "#080c14",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 24px",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        fontFamily: "'DM Sans', sans-serif",
+      }}>
 
-      <div className="ms-auto d-flex align-items-center gap-3">
-        <button className="btn btn-link text-slate-400 position-relative p-1">
-          <i className="bi bi-bell fs-5"></i>
-          <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-        </button>
-
-        <div className="dropdown">
-          <button className="btn btn-link d-flex align-items-center gap-2 text-decoration-none text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            <div className="bg-primary rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style={{ width: '35px', height: '35px' }}>
-              {user.username.charAt(0).toUpperCase()}
-            </div>
-            <div className="text-start d-none d-sm-block">
-              <div className="fw-semibold small">{user.username}</div>
-              <div className="text-slate-400 xs-font" style={{ fontSize: '11px' }}>{user.role}</div>
-            </div>
+        {/* Left — Toggle + Page Title */}
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <button
+            className="toggle-btn"
+            onClick={toggleSidebar}
+            style={{
+              width: "36px", height: "36px",
+              borderRadius: "8px",
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "transparent",
+              color: "#94a3b8",
+              cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "16px",
+              transition: "background 0.15s",
+            }}
+          >
+            {sidebarOpen ? "←" : "→"}
           </button>
-          <ul className="dropdown-menu dropdown-menu-end bg-slate-800 border-slate-700 shadow mt-2">
-            <li><a className="dropdown-item text-white" href="#profile"><i className="bi bi-person me-2"></i>Profile</a></li>
-            <li><a className="dropdown-item text-white" href="#settings"><i className="bi bi-gear me-2"></i>Settings</a></li>
-          </ul>
+
+          <h1 style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: "18px",
+            fontWeight: "800",
+            color: "#f1f5f9",
+            margin: 0,
+          }}>
+            {title}
+          </h1>
         </div>
-      </div>
-    </nav>
+
+        {/* Right — Status Indicator */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#6ee7b7", boxShadow: "0 0 6px #6ee7b7" }} />
+          <span style={{ fontSize: "12px", color: "#475569", fontFamily: "'DM Mono', monospace" }}>
+            API Connected
+          </span>
+        </div>
+      </header>
+    </>
   );
 }

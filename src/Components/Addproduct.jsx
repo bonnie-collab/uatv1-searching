@@ -71,8 +71,20 @@ const Addproducts = () => {
       formdata.append("product_photo", product_photo);
       formdata.append("product_category", product_category);
 
+      // Fetch authentication token from storage
+      const token = localStorage.getItem('userToken') || localStorage.getItem('token');
+
       // axios connection to the backend
-      const response = await axios.post("https://bonnie.alwaysdata.net/api/add_product", formdata);
+      const response = await axios.post(
+        "https://bonnie.alwaysdata.net/api/add_product", 
+        formdata,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
 
       // srt loading action of the form  with messages
       setLoading(false);
@@ -91,7 +103,8 @@ const Addproducts = () => {
 
     } catch (error) {
       setLoading(false);
-      setError(error.message);
+      // Access structured backend message info if it is sent back
+      setError(error.response?.data?.message || error.message);
     }
   };
 
